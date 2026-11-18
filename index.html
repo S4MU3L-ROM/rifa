@@ -54,8 +54,30 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha384-ZZ1pncU3bQe8y31yfZdMFdSpttDoPmOZg2wguVK9almUodir1PghgT0eY7Mrty8H" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
-  // Los datos vienen de datos.json, que genera publicar.bat desde el Excel. No edites aquí.
+  // Los datos vienen de la hoja "Web" de la Hoja de Google "rifa_celular" (publicada como CSV). No edites aquí.
+  const HOJA = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRo-wFyrz0Xrt6VTfiqwE0WToggF4GIuW1U64KKrCeZxQMH7eV35dQhvzs_rkm6NrRwhMPhc6nywvvK/pub?gid=159417971&single=true&output=csv';
   const $ = id => document.getElementById(id);
+  const filaCSV = linea => {
+    const out = []; let cur = '', q = false;
+    for (const c of linea) {
+      if (c === '"') q = !q;
+      else if (c === ',' && !q) { out.push(cur); cur = ''; }
+      else cur += c;
+    }
+    return [...out, cur].map(s => s.trim());
+  };
+  const leerHoja = texto => {
+    const d = { vendidos: [], apartados: [] };
+    for (const [a, b = ''] of texto.split(/\r?\n/).map(filaCSV)) {
+      if (/^\d{1,2}$/.test(a)) {
+        const n = a.padStart(2, '0'), e = b.toLowerCase();
+        if (e === 'pagado') d.vendidos.push(n);
+        else if (e === 'apartado') d.apartados.push(n);
+      } else if (['premio', 'precio'].includes(a)) d[a] = b.replace(/\D/g, '');
+      else if (['loteria', 'sorteo', 'regla'].includes(a)) d[a] = b;
+    }
+    return d;
+  };
   const pesos = v => '$' + Number(v).toLocaleString('es-CO');
   const dia = (iso, sumar = 0) => {
     const d = new Date(iso + 'T12:00:00');
@@ -64,7 +86,7 @@
     return s[0].toUpperCase() + s.slice(1).replace(',', '');
   };
 
-  fetch('datos.json?v=' + Date.now()).then(r => r.json()).then(d => {
+  fetch(HOJA + '&v=' + Date.now()).then(r => r.text()).then(leerHoja).then(d => {
     $('premio').textContent = pesos(d.premio);
     $('precio').textContent = pesos(d.precio);
     $('loteria').textContent = d.loteria;
