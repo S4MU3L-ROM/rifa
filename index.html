@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gran Rifa $800.000</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#0f3d2e; --card:#14513c; --gold:#f5c542; --red:#e0393e; --ink:#fff; --soft:#cfe8dc; }
+  * { box-sizing:border-box; margin:0; }
+  body { background:var(--bg); color:var(--ink); font-family:Poppins,sans-serif; display:flex; justify-content:center; padding:16px; }
+  .banner { width:100%; max-width:560px; background:radial-gradient(circle at top, #1d6b50, var(--card) 60%); border:4px solid var(--gold); border-radius:24px; padding:22px 18px; text-align:center; box-shadow:0 10px 40px #0008; }
+  .tag { display:inline-block; background:var(--red); padding:4px 14px; border-radius:99px; font-weight:800; font-size:.8rem; letter-spacing:.1em; }
+  h1 { font-family:'Bebas Neue',sans-serif; font-size:clamp(3rem,14vw,4.6rem); line-height:.9; margin:10px 0 2px; color:var(--gold); text-shadow:3px 3px 0 #0006; }
+  .sub { font-size:1.05rem; font-weight:600; }
+  .info { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:16px 0; }
+  .info div { background:#0006; border-radius:12px; padding:8px; font-size:.75rem; color:var(--soft); }
+  .info b { display:block; font-size:1.05rem; color:var(--ink); }
+  .info .wide { grid-column:span 2; }
+  .grid { display:grid; grid-template-columns:repeat(10,1fr); gap:4px; }
+  .n { aspect-ratio:1; display:grid; place-items:center; background:#fff; color:var(--bg); border-radius:6px; font-weight:800; font-size:clamp(.7rem,3.2vw,1rem); position:relative; }
+  .n.apartado { background:var(--gold); }
+  .n.vendido { background:#0b2a20; color:#4c7a68; }
+  .n.vendido::after { content:'✕'; position:absolute; color:var(--red); font-size:1.6em; }
+  .legend { display:flex; justify-content:center; gap:14px; margin:10px 0 4px; font-size:.75rem; color:var(--soft); }
+  .legend i { display:inline-block; width:12px; height:12px; border-radius:3px; vertical-align:-1px; margin-right:4px; }
+  .quedan { font-family:'Bebas Neue',sans-serif; font-size:1.8rem; color:var(--gold); margin-top:6px; }
+  .fine { font-size:.68rem; color:var(--soft); margin-top:8px; }
+</style>
+</head>
+<body>
+<main class="banner">
+  <span class="tag">🎄 RIFA NAVIDEÑA 🎄</span>
+  <h1>GANA $800.000</h1>
+  <p class="sub">Boleta: <b>$20.000</b> · 100 números (00 al 99)</p>
+
+  <section class="info">
+    <div class="wide">Juega con las 2 últimas cifras del premio mayor de la<b>Lotería de Boyacá</b></div>
+    <div>Sorteo<b>Sáb. 12 de diciembre</b></div>
+    <div>Entrega del premio<b>Jue. 17 de diciembre</b></div>
+  </section>
+
+  <div class="grid" id="grid"></div>
+  <div class="legend">
+    <span><i style="background:#fff"></i>Disponible</span>
+    <span><i style="background:var(--gold)"></i>Apartado</span>
+    <span><i style="background:#0b2a20;border:1px solid var(--red)"></i>Vendido</span>
+  </div>
+  <p class="quedan" id="quedan"></p>
+  <p class="fine">Si el número ganador no se vendió, el premio queda en casa.</p>
+</main>
+
+<script>
+  // ✏️ EDITA SOLO ESTAS DOS LISTAS (números entre comillas, separados por coma). Ej: ["07", "23"]
+  const vendidos  = [];
+  const apartados = [];
+
+  const grid = document.getElementById('grid');
+  for (let i = 0; i < 100; i++) {
+    const n = String(i).padStart(2, '0');
+    const el = document.createElement('div');
+    el.className = 'n' + (vendidos.includes(n) ? ' vendido' : apartados.includes(n) ? ' apartado' : '');
+    el.textContent = n;
+    grid.appendChild(el);
+  }
+  const libres = 100 - new Set([...vendidos, ...apartados]).size;
+  document.getElementById('quedan').textContent = libres ? `¡Quedan ${libres} números!` : '¡AGOTADA! Gracias 🙌';
+</script>
+</body>
+</html>
