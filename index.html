@@ -3,12 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Gran Rifa $800.000</title>
+<title>Gran Rifa Navideña</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
   :root { --bg:#0f3d2e; --card:#14513c; --gold:#f5c542; --red:#e0393e; --ink:#fff; --soft:#cfe8dc; }
   * { box-sizing:border-box; margin:0; }
-  body { background:var(--bg); color:var(--ink); font-family:Poppins,sans-serif; display:flex; justify-content:center; padding:16px; }
+  body { background:var(--bg); color:var(--ink); font-family:Poppins,sans-serif; display:flex; flex-direction:column; align-items:center; gap:14px; padding:16px; }
+  #descargar { font:600 1rem Poppins,sans-serif; background:var(--gold); color:var(--bg); border:0; border-radius:99px; padding:12px 22px; cursor:pointer; }
   .banner { width:100%; max-width:560px; background:radial-gradient(circle at top, #1d6b50, var(--card) 60%); border:4px solid var(--gold); border-radius:24px; padding:22px 18px; text-align:center; box-shadow:0 10px 40px #0008; }
   .tag { display:inline-block; background:var(--red); padding:4px 14px; border-radius:99px; font-weight:800; font-size:.8rem; letter-spacing:.1em; }
   h1 { font-family:'Bebas Neue',sans-serif; font-size:clamp(3rem,14vw,4.6rem); line-height:.9; margin:10px 0 2px; color:var(--gold); text-shadow:3px 3px 0 #0006; }
@@ -31,13 +32,13 @@
 <body>
 <main class="banner">
   <span class="tag">🎄 RIFA NAVIDEÑA 🎄</span>
-  <h1>GANA $800.000</h1>
-  <p class="sub">Boleta: <b>$20.000</b> · 100 números (00 al 99)</p>
+  <h1>GANA <span id="premio"></span></h1>
+  <p class="sub">Boleta: <b id="precio"></b> · 100 números (00 al 99)</p>
 
   <section class="info">
-    <div class="wide">Juega con las 2 últimas cifras del premio mayor de la<b>Lotería de Boyacá</b></div>
-    <div>Sorteo<b>Sáb. 12 de diciembre</b></div>
-    <div>Entrega del premio<b>Jue. 17 de diciembre</b></div>
+    <div class="wide">Juega con las 2 últimas cifras del premio mayor de la<b id="loteria"></b></div>
+    <div>Sorteo<b id="sorteo"></b></div>
+    <div>Entrega del premio<b id="entrega"></b></div>
   </section>
 
   <div class="grid" id="grid"></div>
@@ -47,24 +48,48 @@
     <span><i style="background:#0b2a20;border:1px solid var(--red)"></i>Vendido</span>
   </div>
   <p class="quedan" id="quedan"></p>
-  <p class="fine">Si el número ganador no se vendió, el premio queda en casa.</p>
+  <p class="fine" id="regla"></p>
 </main>
+<button id="descargar">📥 Descargar tablero como imagen</button>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha384-ZZ1pncU3bQe8y31yfZdMFdSpttDoPmOZg2wguVK9almUodir1PghgT0eY7Mrty8H" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
-  // ✏️ EDITA SOLO ESTAS DOS LISTAS (números entre comillas, separados por coma). Ej: ["07", "23"]
-  const vendidos  = [];
-  const apartados = [];
+  // Los datos vienen de datos.json, que genera publicar.bat desde el Excel. No edites aquí.
+  const $ = id => document.getElementById(id);
+  const pesos = v => '$' + Number(v).toLocaleString('es-CO');
+  const dia = (iso, sumar = 0) => {
+    const d = new Date(iso + 'T12:00:00');
+    d.setDate(d.getDate() + sumar);
+    const s = d.toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long' });
+    return s[0].toUpperCase() + s.slice(1).replace(',', '');
+  };
 
-  const grid = document.getElementById('grid');
-  for (let i = 0; i < 100; i++) {
-    const n = String(i).padStart(2, '0');
-    const el = document.createElement('div');
-    el.className = 'n' + (vendidos.includes(n) ? ' vendido' : apartados.includes(n) ? ' apartado' : '');
-    el.textContent = n;
-    grid.appendChild(el);
-  }
-  const libres = 100 - new Set([...vendidos, ...apartados]).size;
-  document.getElementById('quedan').textContent = libres ? `¡Quedan ${libres} números!` : '¡AGOTADA! Gracias 🙌';
+  fetch('datos.json?v=' + Date.now()).then(r => r.json()).then(d => {
+    $('premio').textContent = pesos(d.premio);
+    $('precio').textContent = pesos(d.precio);
+    $('loteria').textContent = d.loteria;
+    $('sorteo').textContent = dia(d.sorteo);
+    $('entrega').textContent = dia(d.sorteo, 1);
+    $('regla').textContent = `Si el número ganador no se vende: ${d.regla}. El premio se entrega el día siguiente al sorteo.`;
+    for (let i = 0; i < 100; i++) {
+      const n = String(i).padStart(2, '0');
+      const el = document.createElement('div');
+      el.className = 'n' + (d.vendidos.includes(n) ? ' vendido' : d.apartados.includes(n) ? ' apartado' : '');
+      el.textContent = n;
+      $('grid').appendChild(el);
+    }
+    const libres = 100 - new Set([...d.vendidos, ...d.apartados]).size;
+    $('quedan').textContent = libres ? `¡Quedan ${libres} números!` : '¡AGOTADA! Gracias 🙌';
+  });
+
+  $('descargar').onclick = async () => {
+    await document.fonts.ready;
+    const canvas = await html2canvas(document.querySelector('.banner'), { scale: 2, backgroundColor: '#0f3d2e' });
+    const a = document.createElement('a');
+    a.download = 'tablero-rifa.png';
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+  };
 </script>
 </body>
 </html>
