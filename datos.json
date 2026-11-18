@@ -4,6 +4,17 @@
  "loteria": "Lotería de Boyacá",
  "sorteo": "2026-12-12",
  "regla": "Se juega el siguiente sábado",
- "vendidos": [],
- "apartados": []
+ "vendidos": [
+  "27"
+ ],
+ "apartados": [
+  "07",
+  "15",
+  "16",
+  "43",
+  "49",
+  "69",
+  "78",
+  "89"
+ ]
 }
