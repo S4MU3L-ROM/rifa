@@ -84,7 +84,10 @@
 
   $('descargar').onclick = async () => {
     await document.fonts.ready;
-    const canvas = await html2canvas(document.querySelector('.banner'), { scale: 2, backgroundColor: '#0f3d2e' });
+    const canvas = await html2canvas(document.querySelector('.banner'), {
+      scale: 2, backgroundColor: '#0f3d2e',
+      onclone: doc => { doc.querySelector('.banner').style.boxShadow = 'none'; } // html2canvas pinta mal la sombra
+    });
     const a = document.createElement('a');
     a.download = 'tablero-rifa.png';
     a.href = canvas.toDataURL('image/png');
